@@ -23,7 +23,7 @@ from pathlib import Path
 
 # Remove old EDL Files
 
-v4file = Path("tmp/minionsparser/minions-v4.edl.txt")
+v4file = Path("/tmp/minionsparser/minions-v4.edl.txt")
 v6file = Path("/tmp/minionsparser/minions-v6.edl.txt")
 files = [(v4file) , (v6file)]
 for file in files:
@@ -57,4 +57,3 @@ for file in files:
         os.system('sort -r -u /tmp/minionsparser/minions-v4.edl.txt -o /tmp/minionsparser/minions-v4.edl.txt')
     elif file == (v6file):
         os.system('sort -r -u /tmp/minionsparser/minions-v6.edl.txt -o /tmp/minionsparser/minions-v6.edl.txt')
-
