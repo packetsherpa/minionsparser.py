@@ -33,6 +33,10 @@ Python script to normalize the data contained in the file published by Binary Ed
 This repository also contains the Docker wrappers that were previously maintained
 in separate repositories.
 
+The standalone `minionsparser.py` script is the source of truth. Both Docker
+images copy that local script at build time, so parser fixes only need to land in
+one place.
+
 ## Alpine cron container
 
 The Alpine image installs the parser into the daily cron directory and keeps cron
@@ -52,6 +56,20 @@ docker/python-once/build-image.sh
 
 Both images write output to `/tmp/minionsparser` inside the container. The build
 scripts bind mount `/tmp/minionsparser` from the host.
+
+# Development
+
+Run the unit tests with:
+
+```sh
+python3 -m unittest discover -s tests
+```
+
+When changing parser behavior, update `minionsparser.py` first and keep the
+Docker wrappers as thin runtime variants:
+
+- `docker/alpine-cron/` builds the scheduled Alpine container.
+- `docker/python-once/` builds the run-once Python container.
 
 # Support Policy
 

@@ -16,8 +16,8 @@ FEEDS = {
 }
 
 
-def fetch_scanners(url):
-    with urlopen(url, timeout=REQUEST_TIMEOUT_SECONDS) as response:
+def fetch_scanners(url, opener=urlopen):
+    with opener(url, timeout=REQUEST_TIMEOUT_SECONDS) as response:
         payload = json.load(response)
 
     scanners = payload.get("scanners")
@@ -27,21 +27,29 @@ def fetch_scanners(url):
     return scanners
 
 
-def write_edl(url, filename):
-    output_path = OUTPUT_DIR / filename
-    scanners = sorted(set(fetch_scanners(url)), reverse=True)
+def normalize_scanners(scanners):
+    return sorted(set(scanners), reverse=True)
+
+
+def write_edl(url, filename, output_dir=OUTPUT_DIR, opener=urlopen):
+    output_path = output_dir / filename
+    scanners = normalize_scanners(fetch_scanners(url, opener=opener))
     output_path.write_text("\n".join(scanners) + "\n", encoding="utf-8")
     print(f"Wrote {len(scanners)} entries to {output_path}")
 
 
-def main():
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+def process_feeds(feeds=FEEDS, output_dir=OUTPUT_DIR, opener=urlopen):
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    for url, filename in FEEDS.items():
-        try:
-            write_edl(url, filename)
-        except (HTTPError, URLError, TimeoutError, ValueError, json.JSONDecodeError) as error:
-            raise SystemExit(f"Failed to process {url}: {error}") from error
+    for url, filename in feeds.items():
+        write_edl(url, filename, output_dir=output_dir, opener=opener)
+
+
+def main():
+    try:
+        process_feeds()
+    except (HTTPError, URLError, TimeoutError, ValueError, json.JSONDecodeError) as error:
+        raise SystemExit(f"Failed to process feeds: {error}") from error
 
 
 if __name__ == "__main__":
